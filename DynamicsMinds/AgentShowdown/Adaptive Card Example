@@ -1,0 +1,190 @@
+{
+  type: "AdaptiveCard",
+  '$schema': "http://adaptivecards.io/schemas/adaptive-card.json",
+  version: "1.4",
+  body: [
+    {
+      type: "TextBlock",
+      size: "large",
+      weight: "bolder",
+      text: "Leave Request Details"
+    },
+    {
+      type: "TextBlock",
+      text: "Here are the details of the leave request you submitted.",
+      wrap: true,
+      spacing: "medium"
+    },
+    {
+      type: "TextBlock",
+      text: "Available hours balances",
+      wrap: true,
+      spacing: "medium",	  size: "medium",
+
+      weight: "bolder"
+    },
+    {
+      type: "TextBlock",
+      text: Concat(Concatenate(ForAll(Global.LeaveCreditsFlat, "**" & ThisRecord.name & "**: " & ThisRecord.hours)), Char(13) & Value, Char(13)),
+      wrap: true,
+      separator: true,
+      spacing: "medium"
+    },
+    {
+      type: "ColumnSet",
+      columns: [
+        {
+          type: "Column",
+          width: "auto",
+          items: [
+            {
+              type: "TextBlock",
+              text: "Leave Status:",
+              weight: "bolder",			  size: "medium",
+
+              wrap: true
+            }
+          ]
+        },
+        {
+          type: "Column",
+          width: "auto",
+          items: [
+            {
+              type: "TextBlock",
+              text: "Pending",
+              weight: "bolder",
+              wrap: true,
+              color: "warning",			  size: "medium",
+
+              isVisible: Topic.LeaveRequestRecord.ApprovalStatus = 1
+            },
+            {
+              type: "TextBlock",
+              text: "Approved",
+              weight: "bolder",
+              wrap: true,
+              color: "good",			  size: "medium",
+
+              isVisible: Topic.LeaveRequestRecord.ApprovalStatus = 865420001
+            },
+            {
+              type: "TextBlock",
+              text: "Rejected",
+              weight: "bolder",
+              wrap: true,
+              color: "attention",			  size: "medium",
+
+              isVisible: Topic.LeaveRequestRecord.ApprovalStatus = 865420002
+            }
+          ]
+        }
+      ]
+    },
+    {
+      type: "ColumnSet",
+      columns: [
+        {
+          type: "Column",
+          width: "2",
+          items: [
+            {
+              type: "Input.ChoiceSet",
+              choices: ForAll(Global.LeaveTypes, { title: ThisRecord.Name, value: Text(ThisRecord.Id) }),
+              placeholder: "Select leave type",
+              id: "ipChoiceLeaveType",
+              isRequired: true,
+              errorMessage: "Please choose your desired leave type.",
+              label: "Leave type:",
+              spacing: "medium",
+              value: Text(Topic.RequestFormValues.SelectedType.Value)
+            },			{
+
+              type: "Input.Text",
+              placeholder: "Enter hours",			  errorMessage: "Hour(s) should be a valid number.",
+
+              isRequired: true,
+              regex: "^(\d+)?([.]?\d{0,1})?$",
+              label: "Balance hours:",
+              id: "ipNumLeaveCredits",
+              spacing: "medium",
+              value: Text(Topic.RequestFormValues.HoursToUse)
+            },
+    {
+              type: "Input.Date",
+              id: "ipDateStart",
+              isRequired: true,
+              errorMessage: "Please indicate the Start date",
+              label: "Start date:",			  spacing: "medium",
+
+              value: Text(Topic.RequestFormValues.StartDate, "yyyy-MM-dd")
+            },
+            {
+              type: "Input.Date",
+              id: "ipDateEnd",
+              isRequired: true,
+              errorMessage: "Please indicate the End date",
+              label: "End date:",			  spacing: "medium",
+
+              value: Text(Topic.RequestFormValues.EndDate, "yyyy-MM-dd")
+            }
+          ]
+        },
+      ],
+      spacing: "small",	  separator: true
+
+    },	{
+
+      type: "TextBlock",
+      text: "Comments",
+      wrap: true,
+      spacing: "medium",	  size: "medium",
+
+      weight: "bolder"
+    },
+    {
+      type: "Input.Text",
+      placeholder: "Enter comments.",
+      id: "ipTextEmployeeComments",
+      isMultiline: true,	  separator: true,
+
+      spacing: "small",
+      value: Text(Topic.RequestFormValues.Comments)
+    },
+    {
+      type: "TextBlock",
+      text: "Manager's Comments: " & Coalesce(Text(Topic.LeaveRequestRecord.ApprovalComments), "None"),
+      wrap: true,
+      isVisible: Not(Topic.LeaveRequestRecord.ApprovalStatus = 0)
+    },
+    {
+      type: "ActionSet",
+      actions: [
+        {
+          type: "Action.Submit",
+          title: "Update request",
+          data: {
+            selectedAction: "updateRequest"
+          }
+        },
+        {
+          type: "Action.Submit",
+          title: "Cancel request",
+          associatedInputs: "none",
+          data: {
+            selectedAction: "cancelRequest"
+          }
+        },
+        {
+          type: "Action.Submit",
+          title: "Cancel",
+          associatedInputs: "none",
+          data: {
+            selectedAction: "cancel"
+          }
+        }
+      ],
+      spacing: "medium"
+    }
+  ]
+}
